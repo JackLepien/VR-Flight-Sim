@@ -1345,10 +1345,9 @@ GameObject:
   - component: {fileID: 1823866046}
   - component: {fileID: 1823866045}
   - component: {fileID: 1823866044}
-  - component: {fileID: 1823866050}
-  - component: {fileID: 1823866049}
-  - component: {fileID: 1823866048}
   - component: {fileID: 1823866047}
+  - component: {fileID: 1823866048}
+  - component: {fileID: 1823866052}
   m_Layer: 0
   m_Name: XR Origin (VR)
   m_TagString: Untagged
@@ -1430,7 +1429,7 @@ MonoBehaviour:
   m_BodyPositionEvaluatorObject: {fileID: 0}
   m_ConstrainedBodyManipulatorObject: {fileID: 0}
   m_UseCharacterControllerIfExists: 1
---- !u!114 &1823866049
+--- !u!114 &1823866052
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1439,90 +1438,55 @@ MonoBehaviour:
   m_GameObject: {fileID: 1823866043}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75b29b6c6428c984a8a73ffc2d58063b, type: 3}
+  m_Script: {fileID: 11500000, guid: 32446819f31bf1346809f6eb0cce025b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.Locomotion.Turning.ContinuousTurnProvider
-  m_Mediator: {fileID: 1823866047}
-  m_TransformationPriority: 0
-  m_TurnSpeed: 60
-  m_EnableTurnLeftRight: 1
-  m_EnableTurnAround: 0
-  m_LeftHandTurnInput:
-    m_InputSourceMode: 2
-    m_InputAction:
-      m_Name: Left Hand Turn
+  m_EditorClassIdentifier: Assembly-CSharp::TiltController
+  m_PositionAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Controller Position
       m_Type: 0
-      m_ExpectedControlType: Vector2
-      m_Id: 8c668d23-c0f2-4956-a2ff-069ea7a990d8
+      m_ExpectedControlType: Vector3
+      m_Id: 9695a924-ce18-47fd-b3fc-edce9d762b87
       m_Processors: 
       m_Interactions: 
-      m_SingletonActionBindings: []
+      m_SingletonActionBindings:
+      - m_Name: 
+        m_Id: f316fc63-4e70-42e5-92b2-b24a3b2505d4
+        m_Path: <XRController>{RightHand}/devicePosition
+        m_Interactions: 
+        m_Processors: 
+        m_Groups: 
+        m_Action: Right Controller Position
+        m_Flags: 0
       m_Flags: 0
-    m_InputActionReference: {fileID: 0}
-    m_ObjectReferenceObject: {fileID: 0}
-    m_ManualValue: {x: 0, y: 0}
-  m_RightHandTurnInput:
-    m_InputSourceMode: 2
-    m_InputAction:
-      m_Name: Right Hand Turn
-      m_Type: 0
-      m_ExpectedControlType: Vector2
-      m_Id: 395ff5b9-b4df-4a39-9e20-b882040fe80d
+    m_Reference: {fileID: 0}
+  m_CalibrateAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Controller Calibrate
+      m_Type: 1
+      m_ExpectedControlType: 
+      m_Id: 5bb3860a-b70f-42cf-87cf-04618d041228
       m_Processors: 
       m_Interactions: 
-      m_SingletonActionBindings: []
+      m_SingletonActionBindings:
+      - m_Name: 
+        m_Id: 45bbacc4-c05a-46f8-bbde-d31958644148
+        m_Path: <XRController>{RightHand}/primaryButton
+        m_Interactions: 
+        m_Processors: 
+        m_Groups: 
+        m_Action: Right Controller Calibrate
+        m_Flags: 0
       m_Flags: 0
-    m_InputActionReference: {fileID: 0}
-    m_ObjectReferenceObject: {fileID: 0}
-    m_ManualValue: {x: 0, y: 0}
---- !u!114 &1823866050
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1823866043}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 626a4d6723d6ad24b9aebb811ad5a3dd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.XR.Interaction.Toolkit::UnityEngine.XR.Interaction.Toolkit.Locomotion.Movement.ContinuousMoveProvider
-  m_Mediator: {fileID: 1823866047}
-  m_TransformationPriority: 0
-  m_MoveSpeed: 4
-  m_InAirControlModifier: 0.5
-  m_EnableStrafe: 1
-  m_EnableFly: 0
+    m_Reference: {fileID: 0}
+  m_MaxSpeed: 5
+  m_MaxOffset: 0.25
+  m_DeadZone: 0.03
+  m_ResponseCurve: 1.25
+  m_EnableVertical: 0
   m_ForwardSource: {fileID: 0}
-  m_LeftHandMoveInput:
-    m_InputSourceMode: 2
-    m_InputAction:
-      m_Name: Left Hand Move
-      m_Type: 0
-      m_ExpectedControlType: Vector2
-      m_Id: e50c8782-7e63-406d-b4ae-0679686d86a7
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_InputActionReference: {fileID: 0}
-    m_ObjectReferenceObject: {fileID: 0}
-    m_ManualValue: {x: 0, y: 0}
-  m_RightHandMoveInput:
-    m_InputSourceMode: 2
-    m_InputAction:
-      m_Name: Right Hand Move
-      m_Type: 0
-      m_ExpectedControlType: Vector2
-      m_Id: 10174fa4-a489-42f7-b940-c59b9f3d7a6a
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_InputActionReference: {fileID: -1680190386980627800, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-    m_ObjectReferenceObject: {fileID: 0}
-    m_ManualValue: {x: 0, y: 0}
-  m_UseGravity: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
