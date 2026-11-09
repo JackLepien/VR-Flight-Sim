@@ -1447,12 +1447,12 @@ MonoBehaviour:
       m_Name: Right Controller Position
       m_Type: 0
       m_ExpectedControlType: Vector3
-      m_Id: 9695a924-ce18-47fd-b3fc-edce9d762b87
+      m_Id: b7b2d0b2-4ece-4f55-b90d-f80f36b26ebc
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings:
       - m_Name: 
-        m_Id: f316fc63-4e70-42e5-92b2-b24a3b2505d4
+        m_Id: c4405cec-924a-4d64-bb5d-75fd30c3339f
         m_Path: <XRController>{RightHand}/devicePosition
         m_Interactions: 
         m_Processors: 
@@ -1467,12 +1467,12 @@ MonoBehaviour:
       m_Name: Right Controller Calibrate
       m_Type: 1
       m_ExpectedControlType: 
-      m_Id: 5bb3860a-b70f-42cf-87cf-04618d041228
+      m_Id: bddff3e6-7704-4ef7-bd46-aaafd8fdc83a
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings:
       - m_Name: 
-        m_Id: 45bbacc4-c05a-46f8-bbde-d31958644148
+        m_Id: 16346709-67f7-4dd1-b777-db62a2d30c5a
         m_Path: <XRController>{RightHand}/primaryButton
         m_Interactions: 
         m_Processors: 
@@ -1487,6 +1487,11 @@ MonoBehaviour:
   m_ResponseCurve: 1.25
   m_EnableVertical: 0
   m_ForwardSource: {fileID: 0}
+  m_TiltWithMovement: 1
+  m_MaxPitch: 20
+  m_MaxRoll: 20
+  m_TiltResponsiveness: 3
+  m_Origin: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

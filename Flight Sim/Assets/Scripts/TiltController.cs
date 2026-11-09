@@ -1,3 +1,4 @@
+using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -46,8 +47,33 @@ public class TiltController : MonoBehaviour
              "Assign the camera to move relative to where you look.")]
     [SerializeField] Transform m_ForwardSource;
 
+    [Header("Helicopter Tilt")]
+    [Tooltip("Tilt the cockpit view with movement: pitch forward/back and bank into sideways movement. " +
+             "Added on top of headset rotation.")]
+    [SerializeField] bool m_TiltWithMovement = true;
+
+    [Tooltip("Degrees the view pitches down at full forward speed (and up at full backward speed).")]
+    [SerializeField, Range(0f, 45f)] float m_MaxPitch = 15f;
+
+    [Tooltip("Degrees the view banks toward the side at full sideways speed.")]
+    [SerializeField, Range(0f, 45f)] float m_MaxRoll = 15f;
+
+    [Tooltip("How quickly the tilt follows movement. Higher = snappier, lower = floatier.")]
+    [SerializeField, Range(0.5f, 15f)] float m_TiltResponsiveness = 3f;
+
+    [Tooltip("Optional. Defaults to the XROrigin on this GameObject.")]
+    [SerializeField] XROrigin m_Origin;
+
     Vector3 m_Neutral;
     bool m_HasNeutral;
+    float m_Pitch; // current applied tilt, degrees (positive = nose down)
+    float m_Roll;  // current applied tilt, degrees (positive = bank right)
+
+    void Awake()
+    {
+        if (m_Origin == null)
+            m_Origin = GetComponent<XROrigin>();
+    }
 
     void OnEnable()
     {
@@ -64,9 +90,29 @@ public class TiltController : MonoBehaviour
 
     void Update()
     {
+        var input = ReadMoveInput();
+
+        if (input != Vector3.zero)
+        {
+            // Tracking-space offset -> world direction using the source's yaw.
+            var source = m_ForwardSource != null ? m_ForwardSource : transform;
+            var forward = Vector3.ProjectOnPlane(source.forward, Vector3.up).normalized;
+            var right = Vector3.ProjectOnPlane(source.right, Vector3.up).normalized;
+
+            var direction = right * input.x + Vector3.up * input.y + forward * input.z;
+            transform.position += direction * (m_MaxSpeed * Time.deltaTime);
+        }
+
+        // Runs every frame (even with no input) so the view eases back to level when you stop.
+        ApplyTilt(input);
+    }
+
+    /// <summary>Returns the dead-zoned, curved hand offset from neutral, or zero if untracked.</summary>
+    Vector3 ReadMoveInput()
+    {
         var positionAction = m_PositionAction.action;
         if (positionAction == null || positionAction.controls.Count == 0)
-            return; // Controller not connected/tracked yet.
+            return Vector3.zero; // Controller not connected/tracked yet.
 
         var position = positionAction.ReadValue<Vector3>();
 
@@ -81,17 +127,43 @@ public class TiltController : MonoBehaviour
         if (!m_EnableVertical)
             offset.y = 0f;
 
-        var input = ApplyDeadZoneAndCurve(offset);
-        if (input == Vector3.zero)
+        return ApplyDeadZoneAndCurve(offset);
+    }
+
+    /// <summary>
+    /// Helicopter effect: pitches the XR Origin forward/back and banks it toward sideways movement.
+    /// The rotation pivots around the camera and is added on top of the headset's own rotation, so
+    /// looking around still works normally. Tilt is rebuilt from the origin's yaw each frame
+    /// (yaw * pitch * roll), so it never drifts and turning with other providers still works.
+    /// </summary>
+    void ApplyTilt(Vector3 input)
+    {
+        var targetPitch = m_TiltWithMovement ? input.z * m_MaxPitch : 0f;
+        var targetRoll = m_TiltWithMovement ? input.x * m_MaxRoll : 0f;
+
+        var blend = 1f - Mathf.Exp(-m_TiltResponsiveness * Time.deltaTime);
+        m_Pitch = Mathf.Lerp(m_Pitch, targetPitch, blend);
+        m_Roll = Mathf.Lerp(m_Roll, targetRoll, blend);
+
+        // Nothing to do once level and not tilting.
+        if (!m_TiltWithMovement && Mathf.Approximately(m_Pitch, 0f) && Mathf.Approximately(m_Roll, 0f)
+            && transform.up == Vector3.up)
             return;
 
-        // Tracking-space offset -> world direction using the source's yaw.
-        var source = m_ForwardSource != null ? m_ForwardSource : transform;
-        var forward = Vector3.ProjectOnPlane(source.forward, Vector3.up).normalized;
-        var right = Vector3.ProjectOnPlane(source.right, Vector3.up).normalized;
+        // Heading is the flattened forward; roll doesn't move forward and pitch < 90 keeps it valid.
+        var flatForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up);
+        if (flatForward.sqrMagnitude < 1e-6f)
+            return;
+        var yaw = Quaternion.LookRotation(flatForward.normalized, Vector3.up);
 
-        var direction = right * input.x + Vector3.up * input.y + forward * input.z;
-        transform.position += direction * (m_MaxSpeed * Time.deltaTime);
+        // Positive pitch = nose down (Unity +X). Positive roll = bank right (Unity -Z).
+        var tilt = Quaternion.Euler(m_Pitch, 0f, -m_Roll);
+
+        // Rotate about the camera so the head stays put instead of swinging around the origin.
+        var pivot = m_Origin != null && m_Origin.Camera != null ? m_Origin.Camera.transform : transform;
+        var pivotBefore = pivot.position;
+        transform.rotation = yaw * tilt;
+        transform.position += pivotBefore - pivot.position;
     }
 
     Vector3 ApplyDeadZoneAndCurve(Vector3 offset)
