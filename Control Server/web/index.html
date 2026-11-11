@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rotor // Local Flight Controls</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">VR FLIGHT SIMULATOR / CONTROL DECK</p>
+        <h1>Rotor<span>//</span>Local</h1>
+      </div>
+      <div class="status-wrap">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">SERVER CONNECTING</span>
+      </div>
+    </header>
+
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <p class="eyebrow">TRAINING MODE</p>
+        <h2>Helicopter control surface</h2>
+        <p class="muted">Drive the cyclic, collective, and pedals locally. The current packet is ready to route into Unity.</p>
+      </div>
+      <div class="telemetry-card">
+        <span class="label">PACKET SEQUENCE</span>
+        <strong id="sequence">000000</strong>
+        <span class="muted small" id="udpStatus">LOCAL ONLY</span>
+      </div>
+    </section>
+
+    <section class="control-grid">
+      <article class="panel cyclic-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">PRIMARY FLIGHT CONTROL</p>
+            <h3>Cyclic</h3>
+          </div>
+          <span class="axis-readout" id="cyclicReadout">X +0.00 / Y +0.00</span>
+        </div>
+        <div class="cyclic-pad" id="cyclicPad" aria-label="Cyclic control pad" tabindex="0">
+          <div class="crosshair horizontal"></div>
+          <div class="crosshair vertical"></div>
+          <div class="cyclic-ring"></div>
+          <div class="cyclic-stick" id="cyclicStick">
+            <span></span>
+          </div>
+          <span class="pad-label pad-forward">NOSE DOWN</span>
+          <span class="pad-label pad-back">NOSE UP</span>
+          <span class="pad-label pad-left">ROLL LEFT</span>
+          <span class="pad-label pad-right">ROLL RIGHT</span>
+        </div>
+        <p class="hint">Drag the stick, or use <kbd>WASD</kbd>. Release to return to neutral.</p>
+        <button class="secondary-button" id="centerButton" type="button">CENTER CYCLIC</button>
+      </article>
+
+      <div class="secondary-controls">
+        <article class="panel slider-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">VERTICAL LIFT</p>
+              <h3>Collective</h3>
+            </div>
+            <span class="axis-readout" id="collectiveReadout">+0.00</span>
+          </div>
+          <div class="slider-shell collective-shell">
+            <span class="slider-end">MAX</span>
+            <input id="collectiveSlider" type="range" min="-1" max="1" step="0.01" value="0" aria-label="Collective">
+            <span class="slider-end">MIN</span>
+          </div>
+          <p class="hint">Use <kbd>Q</kbd>/<kbd>E</kbd> or drag the slider.</p>
+        </article>
+
+        <article class="panel slider-panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">TAIL ROTOR</p>
+              <h3>Yaw pedals</h3>
+            </div>
+            <span class="axis-readout" id="yawReadout">+0.00</span>
+          </div>
+          <div class="slider-shell yaw-shell">
+            <span class="slider-end">LEFT</span>
+            <input id="yawSlider" type="range" min="-1" max="1" step="0.01" value="0" aria-label="Yaw pedals">
+            <span class="slider-end">RIGHT</span>
+          </div>
+          <p class="hint">Use <kbd>J</kbd>/<kbd>L</kbd> or drag the pedals.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="bottom-grid">
+      <div class="packet-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">OUTGOING CONTROL PACKET</p>
+            <h3>Normalized telemetry</h3>
+          </div>
+          <button class="danger-button" id="resetButton" type="button">RESET ALL</button>
+        </div>
+        <pre id="packetView">{}</pre>
+      </div>
+      <aside class="help-panel">
+        <p class="eyebrow">SHORTCUTS</p>
+        <div class="shortcut-row"><kbd>W A S D</kbd><span>cyclic / pitch / roll</span></div>
+        <div class="shortcut-row"><kbd>Q E</kbd><span>collective down / up</span></div>
+        <div class="shortcut-row"><kbd>J L</kbd><span>pedal left / right</span></div>
+        <div class="shortcut-row"><kbd>SPACE</kbd><span>reset controls</span></div>
+      </aside>
+    </section>
+
+    <footer>
+      <span>LOCALHOST CONTROL SERVER</span>
+      <span>ALL AXES NORMALIZED // -1.00 TO +1.00</span>
+    </footer>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
