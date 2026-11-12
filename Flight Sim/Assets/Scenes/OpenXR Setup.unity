@@ -10555,8 +10555,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TiltController
   m_ControlSource: 1
-  m_ClimbSpeed: 5
-  m_YawSpeed: 90
+  m_ClimbSpeed: 8
+  m_YawSpeed: 60
   m_PositionAction:
     m_UseReference: 0
     m_Action:
@@ -10597,7 +10597,7 @@ MonoBehaviour:
         m_Flags: 0
       m_Flags: 0
     m_Reference: {fileID: 0}
-  m_MaxSpeed: 5
+  m_MaxSpeed: 10
   m_MaxOffset: 0.25
   m_DeadZone: 0.03
   m_ResponseCurve: 1.25
