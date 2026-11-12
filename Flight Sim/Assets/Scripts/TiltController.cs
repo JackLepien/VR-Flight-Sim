@@ -16,6 +16,16 @@ using UnityEngine.InputSystem;
 [DisallowMultipleComponent]
 public class TiltController : MonoBehaviour
 {
+    public enum ControlSource { VRController, LocalServer }
+
+    [Header("Control Source")]
+    [Tooltip("VR Controller preserves the calibrated hand controls. Local Server uses browser cyclic, collective and pedals.")]
+    [SerializeField] ControlSource m_ControlSource = ControlSource.VRController;
+
+    [Header("Local Server Movement")]
+    [SerializeField, Min(0f)] float m_ClimbSpeed = 3f;
+    [SerializeField, Min(0f)] float m_YawSpeed = 45f;
+
     [Header("Input")]
     [Tooltip("Right controller position (Vector3), in XR Origin tracking space.")]
     [SerializeField] InputActionProperty m_PositionAction = new InputActionProperty(
@@ -66,6 +76,7 @@ public class TiltController : MonoBehaviour
 
     Vector3 m_Neutral;
     bool m_HasNeutral;
+    HelicopterControlReceiver m_ServerInput;
     float m_Pitch; // current applied tilt, degrees (positive = nose down)
     float m_Roll;  // current applied tilt, degrees (positive = bank right)
 
@@ -86,11 +97,35 @@ public class TiltController : MonoBehaviour
     {
         Disable(m_PositionAction);
         Disable(m_CalibrateAction);
+        if (m_ServerInput != null)
+            m_ServerInput.enabled = false;
     }
 
     void Update()
     {
-        var input = ReadMoveInput();
+        bool useServer = m_ControlSource == ControlSource.LocalServer;
+        Vector3 input;
+        if (useServer)
+        {
+            if (m_ServerInput == null)
+            {
+                m_ServerInput = GetComponent<HelicopterControlReceiver>();
+                if (m_ServerInput == null)
+                    m_ServerInput = gameObject.AddComponent<HelicopterControlReceiver>();
+            }
+            m_ServerInput.enabled = true;
+            m_ServerInput.TryRead(out var controls);
+            input = new Vector3(controls.cyclicX, controls.collective, controls.cyclicY);
+
+            var pivot = m_Origin != null && m_Origin.Camera != null ? m_Origin.Camera.transform : transform;
+            transform.RotateAround(pivot.position, Vector3.up, controls.yaw * m_YawSpeed * Time.deltaTime);
+        }
+        else
+        {
+            if (m_ServerInput != null)
+                m_ServerInput.enabled = false;
+            input = ReadMoveInput();
+        }
 
         if (input != Vector3.zero)
         {
@@ -99,8 +134,10 @@ public class TiltController : MonoBehaviour
             var forward = Vector3.ProjectOnPlane(source.forward, Vector3.up).normalized;
             var right = Vector3.ProjectOnPlane(source.right, Vector3.up).normalized;
 
-            var direction = right * input.x + Vector3.up * input.y + forward * input.z;
-            transform.position += direction * (m_MaxSpeed * Time.deltaTime);
+            float verticalSpeed = useServer ? m_ClimbSpeed : m_MaxSpeed;
+            var velocity = (right * input.x + forward * input.z) * m_MaxSpeed
+                + Vector3.up * (input.y * verticalSpeed);
+            transform.position += velocity * Time.deltaTime;
         }
 
         // Runs every frame (even with no input) so the view eases back to level when you stop.
