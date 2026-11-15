@@ -100,7 +100,7 @@ async function publishControls() {
     statusText.textContent = 'SERVER ONLINE';
     document.querySelector('#sequence').textContent = String(lastServerPacket.sequence).padStart(6, '0');
     document.querySelector('#udpStatus').textContent = lastServerPacket.udpEnabled
-      ? `UNITY UDP // ${lastServerPacket.udpTarget}`
+      ? `UDP FORWARDING // ${lastServerPacket.udpTarget}`
       : 'LOCAL ONLY // UNITY NOT CONNECTED';
   } catch (error) {
     statusDot.classList.remove('ready');

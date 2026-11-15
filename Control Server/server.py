@@ -28,7 +28,7 @@ WEB_ROOT = ROOT / "web"
 HOST = "127.0.0.1"
 PORT = int(os.environ.get("CONTROL_SERVER_PORT", "8765"))
 UNITY_UDP_HOST = os.environ.get("UNITY_UDP_HOST", "")
-UNITY_UDP_PORT = int(os.environ.get("UNITY_UDP_PORT", "5050"))
+UNITY_UDP_PORT = int(os.environ.get("UNITY_UDP_PORT", "15050"))
 
 CONTROL_KEYS = ("cyclicX", "cyclicY", "collective", "yaw")
 state_lock = threading.Lock()
@@ -166,6 +166,12 @@ class ControlRequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(content)
 
     def send_json(self, payload: dict[str, Any], status: HTTPStatus = HTTPStatus.OK) -> None:
+        if "sequence" in payload:
+            payload = {
+                **payload,
+                "udpEnabled": bool(UNITY_UDP_HOST),
+                "udpTarget": f"{UNITY_UDP_HOST}:{UNITY_UDP_PORT}" if UNITY_UDP_HOST else None,
+            }
         content = json.dumps(payload).encode("utf-8")
         self.send_response(status)
         self.send_common_headers()
