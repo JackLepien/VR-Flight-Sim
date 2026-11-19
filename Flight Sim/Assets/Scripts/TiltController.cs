@@ -21,6 +21,9 @@ public class TiltController : MonoBehaviour
 {
     public enum ControlSource { VRController, LocalServer }
 
+    /// <summary>Translational flight speed normalized by the horizontal and vertical speed settings.</summary>
+    public float MovementSpeedFraction { get; private set; }
+
     [Header("Control Source")]
     [Tooltip("VR Controller preserves the calibrated hand controls. Local Server uses browser cyclic, collective and pedals.")]
     [SerializeField] ControlSource m_ControlSource = ControlSource.VRController;
@@ -139,6 +142,7 @@ public class TiltController : MonoBehaviour
 
     void OnDisable()
     {
+        MovementSpeedFraction = 0f;
         Disable(m_PositionAction);
         Disable(m_CalibrateAction);
         Disable(m_SecondaryCalibrateAction);
@@ -154,6 +158,7 @@ public class TiltController : MonoBehaviour
 
     void Update()
     {
+        MovementSpeedFraction = 0f;
         bool useServer = m_ControlSource == ControlSource.LocalServer;
         Vector3 input;
         float yawRate;
@@ -205,9 +210,13 @@ public class TiltController : MonoBehaviour
             var right = Vector3.ProjectOnPlane(source.right, Vector3.up).normalized;
 
             float verticalSpeed = useServer ? m_ClimbSpeed : m_VRVerticalSpeed;
-            var velocity = (right * input.x + forward * input.z) * m_MaxSpeed
-                + Vector3.up * (input.y * verticalSpeed);
+            var horizontalInput = right * input.x + forward * input.z;
+            var velocity = horizontalInput * m_MaxSpeed + Vector3.up * (input.y * verticalSpeed);
             transform.position += velocity * Time.deltaTime;
+
+            float horizontalFractionSquared = m_MaxSpeed != 0f ? horizontalInput.sqrMagnitude : 0f;
+            float verticalFraction = verticalSpeed != 0f ? input.y : 0f;
+            MovementSpeedFraction = Mathf.Sqrt(Mathf.Min(1f, horizontalFractionSquared + verticalFraction * verticalFraction));
         }
 
         // Runs every frame (even with no input) so the view eases back to level when you stop.
