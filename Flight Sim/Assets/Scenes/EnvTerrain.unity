@@ -4078,6 +4078,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7739822871149930192, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
       propertyPath: m_ControlSource
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7739822871149930192, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+      propertyPath: m_VRVerticalSpeed
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7739822871149930192, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+      propertyPath: m_RecalibrationPauseSeconds
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8821864088916747054, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
@@ -4552,6 +4560,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: ea8d58081c8ab834c8eab78dbfb4b4fe, type: 3}
       propertyPath: m_Name
       value: Castle (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8069581607587424549, guid: ea8d58081c8ab834c8eab78dbfb4b4fe, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
