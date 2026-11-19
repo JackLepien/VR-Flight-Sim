@@ -11710,6 +11710,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: XR Origin (VR)
       objectReference: {fileID: 0}
+    - target: {fileID: 7739822871149930192, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+      propertyPath: m_MaxSpeed
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7739822871149930192, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+      propertyPath: m_VRYawSpeed
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 7739822871149930192, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+      propertyPath: m_ControlSource
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7739822871149930192, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+      propertyPath: m_VRVerticalSpeed
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 8821864088916747054, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

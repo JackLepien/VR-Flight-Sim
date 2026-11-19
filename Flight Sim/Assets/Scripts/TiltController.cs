@@ -7,11 +7,14 @@ using UnityEngine.InputSystem;
 /// neutral position, like a joystick you push with your whole hand.
 ///   Move hand forward / back / left / right of neutral -> origin moves that way.
 ///   The farther from neutral, the faster it moves.
+///   Squeeze the right trigger to ascend or the right grip to descend.
+///   Vertical speed is proportional to the difference in squeeze amounts.
+///   Move the right thumbstick left or right to turn.
 ///
 /// Add this to the "XR Origin (VR)" GameObject. Works with the OpenXR plugin; the controller
 /// pose is read directly from the Input System, so no controller objects need to be wired up.
-/// The hand position on the first tracked frame is the neutral position. Press the right
-/// primary button (A) to re-zero it wherever your hand currently is.
+/// The hand position on the first tracked frame is the neutral position. Press A or B on
+/// the right controller to re-zero it at your current hand position and pause flight movement.
 /// </summary>
 [DisallowMultipleComponent]
 public class TiltController : MonoBehaviour
@@ -32,14 +35,44 @@ public class TiltController : MonoBehaviour
         new InputAction("Right Controller Position", InputActionType.Value,
                         "<XRController>{RightHand}/devicePosition", expectedControlType: "Vector3"));
 
-    [Tooltip("When this button is pressed, the current hand position becomes the neutral (no movement) position.")]
+    [Tooltip("Right A button sets the current hand position as neutral and pauses flight movement.")]
     [SerializeField] InputActionProperty m_CalibrateAction = new InputActionProperty(
         new InputAction("Right Controller Calibrate", InputActionType.Button,
                         "<XRController>{RightHand}/primaryButton"));
 
+    [Tooltip("Right B button sets the current hand position as neutral and pauses flight movement.")]
+    [SerializeField] InputActionProperty m_SecondaryCalibrateAction = new InputActionProperty(
+        new InputAction("Right Controller Secondary Calibrate", InputActionType.Button,
+                        "<XRController>{RightHand}/secondaryButton"));
+
+    [Tooltip("Right trigger squeeze (0 to 1) controls ascent.")]
+    [SerializeField] InputActionProperty m_AscendAction = new InputActionProperty(
+        new InputAction("Right Controller Ascend", InputActionType.Value,
+                        "<XRController>{RightHand}/trigger", expectedControlType: "Axis"));
+
+    [Tooltip("Right grip squeeze (0 to 1) controls descent.")]
+    [SerializeField] InputActionProperty m_DescendAction = new InputActionProperty(
+        new InputAction("Right Controller Descend", InputActionType.Value,
+                        "<XRController>{RightHand}/grip", expectedControlType: "Axis"));
+
+    [Tooltip("The right thumbstick's horizontal axis controls yaw.")]
+    [SerializeField] InputActionProperty m_YawAction = new InputActionProperty(
+        new InputAction("Right Controller Yaw", InputActionType.Value,
+                        "<XRController>{RightHand}/primary2DAxis", expectedControlType: "Vector2"));
+
+    [Header("Calibration")]
+    [Tooltip("Seconds to hold the XR Origin's position and rotation after pressing A or B to recalibrate.")]
+    [SerializeField, Min(0f)] float m_RecalibrationPauseSeconds = 1f;
+
     [Header("Movement")]
-    [Tooltip("Top speed in meters/second when the hand is at Max Offset.")]
+    [Tooltip("Top horizontal speed in meters/second when the hand is at Max Offset.")]
     [SerializeField] float m_MaxSpeed = 5f;
+
+    [Tooltip("Top climb and descent speed in meters/second at full VR trigger or grip squeeze.")]
+    [SerializeField, Min(0f)] float m_VRVerticalSpeed = 5f;
+
+    [Tooltip("Top turn speed in degrees per second at full right thumbstick deflection.")]
+    [SerializeField, Min(0f)] float m_VRYawSpeed = 45f;
 
     [Tooltip("Hand distance from neutral (meters) that produces full speed.")]
     [SerializeField, Range(0.05f, 0.6f)] float m_MaxOffset = 0.25f;
@@ -50,7 +83,7 @@ public class TiltController : MonoBehaviour
     [Tooltip("Shapes the response. 1 = linear, >1 = gentler near neutral.")]
     [SerializeField, Range(1f, 3f)] float m_ResponseCurve = 1.25f;
 
-    [Tooltip("Also move up/down when the hand moves up/down.")]
+    [Tooltip("Add vertical hand movement to VR trigger and grip altitude input.")]
     [SerializeField] bool m_EnableVertical = false;
 
     [Tooltip("Optional. Transform whose yaw defines 'forward'. Defaults to this XR Origin (so turning steers movement). " +
@@ -76,6 +109,9 @@ public class TiltController : MonoBehaviour
 
     Vector3 m_Neutral;
     bool m_HasNeutral;
+    double m_RecalibrationStartTime;
+    double m_ResumeMovementTime;
+    RecalibrationOverlay m_RecalibrationOverlay;
     HelicopterControlReceiver m_ServerInput;
     float m_Pitch; // current applied tilt, degrees (positive = nose down)
     float m_Roll;  // current applied tilt, degrees (positive = bank right)
@@ -90,21 +126,34 @@ public class TiltController : MonoBehaviour
     {
         Enable(m_PositionAction);
         Enable(m_CalibrateAction);
+        Enable(m_SecondaryCalibrateAction);
+        Enable(m_AscendAction);
+        Enable(m_DescendAction);
+        Enable(m_YawAction);
         m_HasNeutral = false;
+        m_ResumeMovementTime = 0d;
     }
 
     void OnDisable()
     {
         Disable(m_PositionAction);
         Disable(m_CalibrateAction);
+        Disable(m_SecondaryCalibrateAction);
+        Disable(m_AscendAction);
+        Disable(m_DescendAction);
+        Disable(m_YawAction);
+        m_RecalibrationOverlay?.Hide();
         if (m_ServerInput != null)
             m_ServerInput.enabled = false;
     }
+
+    void OnDestroy() => m_RecalibrationOverlay?.Destroy();
 
     void Update()
     {
         bool useServer = m_ControlSource == ControlSource.LocalServer;
         Vector3 input;
+        float yawRate;
         if (useServer)
         {
             if (m_ServerInput == null)
@@ -116,15 +165,33 @@ public class TiltController : MonoBehaviour
             m_ServerInput.enabled = true;
             m_ServerInput.TryRead(out var controls);
             input = new Vector3(controls.cyclicX, controls.collective, controls.cyclicY);
-
-            var pivot = m_Origin != null && m_Origin.Camera != null ? m_Origin.Camera.transform : transform;
-            transform.RotateAround(pivot.position, Vector3.up, controls.yaw * m_YawSpeed * Time.deltaTime);
+            yawRate = controls.yaw * m_YawSpeed;
         }
         else
         {
             if (m_ServerInput != null)
                 m_ServerInput.enabled = false;
             input = ReadMoveInput();
+            yawRate = ReadYawInput() * m_VRYawSpeed;
+        }
+
+        var now = Time.unscaledTimeAsDouble;
+        if (now < m_ResumeMovementTime)
+        {
+            if (m_RecalibrationOverlay == null && m_Origin != null && m_Origin.Camera != null)
+                m_RecalibrationOverlay = new RecalibrationOverlay(m_Origin.Camera);
+
+            var progress = (float)((now - m_RecalibrationStartTime) / (m_ResumeMovementTime - m_RecalibrationStartTime));
+            m_RecalibrationOverlay?.Show(progress);
+            // Freeze the current pose, including the pitch and roll applied by ApplyTilt.
+            return;
+        }
+        m_RecalibrationOverlay?.Hide();
+
+        if (yawRate != 0f)
+        {
+            var pivot = m_Origin != null && m_Origin.Camera != null ? m_Origin.Camera.transform : transform;
+            transform.RotateAround(pivot.position, Vector3.up, yawRate * Time.deltaTime);
         }
 
         if (input != Vector3.zero)
@@ -134,7 +201,7 @@ public class TiltController : MonoBehaviour
             var forward = Vector3.ProjectOnPlane(source.forward, Vector3.up).normalized;
             var right = Vector3.ProjectOnPlane(source.right, Vector3.up).normalized;
 
-            float verticalSpeed = useServer ? m_ClimbSpeed : m_MaxSpeed;
+            float verticalSpeed = useServer ? m_ClimbSpeed : m_VRVerticalSpeed;
             var velocity = (right * input.x + forward * input.z) * m_MaxSpeed
                 + Vector3.up * (input.y * verticalSpeed);
             transform.position += velocity * Time.deltaTime;
@@ -144,27 +211,48 @@ public class TiltController : MonoBehaviour
         ApplyTilt(input);
     }
 
-    /// <summary>Returns the dead-zoned, curved hand offset from neutral, or zero if untracked.</summary>
+    float ReadYawInput()
+    {
+        const float deadZone = 0.15f;
+        var stick = m_YawAction.action?.ReadValue<Vector2>() ?? Vector2.zero;
+        var magnitude = Mathf.InverseLerp(deadZone, 1f, Mathf.Abs(stick.x));
+        return Mathf.Sign(stick.x) * magnitude;
+    }
+
+    /// <summary>Combines the calibrated hand offset with analog altitude input.</summary>
     Vector3 ReadMoveInput()
     {
+        var ascend = Mathf.Clamp01(m_AscendAction.action?.ReadValue<float>() ?? 0f);
+        var descend = Mathf.Clamp01(m_DescendAction.action?.ReadValue<float>() ?? 0f);
+        var altitude = ascend - descend;
+
         var positionAction = m_PositionAction.action;
         if (positionAction == null || positionAction.controls.Count == 0)
-            return Vector3.zero; // Controller not connected/tracked yet.
+            return Vector3.up * altitude;
 
         var position = positionAction.ReadValue<Vector3>();
 
-        var calibrate = m_CalibrateAction.action;
-        if (!m_HasNeutral || (calibrate != null && calibrate.WasPressedThisFrame()))
+        bool recalibrate = (m_CalibrateAction.action?.WasPressedThisFrame() ?? false)
+            || (m_SecondaryCalibrateAction.action?.WasPressedThisFrame() ?? false);
+        if (!m_HasNeutral || recalibrate)
         {
             m_Neutral = position;
             m_HasNeutral = true;
+        }
+
+        if (recalibrate)
+        {
+            m_RecalibrationStartTime = Time.unscaledTimeAsDouble;
+            m_ResumeMovementTime = m_RecalibrationStartTime + m_RecalibrationPauseSeconds;
         }
 
         var offset = position - m_Neutral;
         if (!m_EnableVertical)
             offset.y = 0f;
 
-        return ApplyDeadZoneAndCurve(offset);
+        var input = ApplyDeadZoneAndCurve(offset);
+        input.y = Mathf.Clamp(input.y + altitude, -1f, 1f);
+        return input;
     }
 
     /// <summary>

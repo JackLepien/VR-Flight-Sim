@@ -183,6 +183,7 @@ MonoBehaviour:
       m_Flags: 0
     m_Reference: {fileID: 0}
   m_MaxSpeed: 10
+  m_VRVerticalSpeed: 10
   m_MaxOffset: 0.25
   m_DeadZone: 0.03
   m_ResponseCurve: 1.25
