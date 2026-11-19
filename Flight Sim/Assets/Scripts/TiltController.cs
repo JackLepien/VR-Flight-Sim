@@ -64,6 +64,9 @@ public class TiltController : MonoBehaviour
     [Tooltip("Seconds to hold the XR Origin's position and rotation after pressing A or B to recalibrate.")]
     [SerializeField, Min(0f)] float m_RecalibrationPauseSeconds = 1f;
 
+    [Tooltip("Size multiplier for the recalibration panel, text, and progress bar.")]
+    [SerializeField, Min(0.1f)] float m_RecalibrationOverlayScale = 1.5f;
+
     [Header("Movement")]
     [Tooltip("Top horizontal speed in meters/second when the hand is at Max Offset.")]
     [SerializeField] float m_MaxSpeed = 5f;
@@ -179,7 +182,7 @@ public class TiltController : MonoBehaviour
         if (now < m_ResumeMovementTime)
         {
             if (m_RecalibrationOverlay == null && m_Origin != null && m_Origin.Camera != null)
-                m_RecalibrationOverlay = new RecalibrationOverlay(m_Origin.Camera);
+                m_RecalibrationOverlay = new RecalibrationOverlay(m_Origin.Camera, m_RecalibrationOverlayScale);
 
             var progress = (float)((now - m_RecalibrationStartTime) / (m_ResumeMovementTime - m_RecalibrationStartTime));
             m_RecalibrationOverlay?.Show(progress);

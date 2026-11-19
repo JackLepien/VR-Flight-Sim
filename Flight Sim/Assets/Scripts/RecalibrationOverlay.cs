@@ -8,7 +8,7 @@ sealed class RecalibrationOverlay
     readonly RectTransform m_Fill;
     readonly Material m_Material;
 
-    public RecalibrationOverlay(Camera camera)
+    public RecalibrationOverlay(Camera camera, float scale)
     {
         m_Root = new GameObject("Recalibration Overlay", typeof(RectTransform), typeof(Canvas));
         m_Root.layer = camera.gameObject.layer;
@@ -20,7 +20,7 @@ sealed class RecalibrationOverlay
         var panel = (RectTransform)m_Root.transform;
         panel.SetParent(camera.transform, false);
         panel.localPosition = new Vector3(0f, 0f, 1.25f);
-        panel.localScale = Vector3.one * 0.00065f;
+        panel.localScale = Vector3.one * (0.00065f * scale);
         panel.sizeDelta = new Vector2(420f, 120f);
 
         var shader = Resources.Load<Shader>("RecalibrationOverlay");

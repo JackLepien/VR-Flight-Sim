@@ -139,7 +139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32446819f31bf1346809f6eb0cce025b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TiltController
-  m_ControlSource: 1
+  m_ControlSource: 0
   m_ClimbSpeed: 8
   m_YawSpeed: 60
   m_PositionAction:
@@ -182,8 +182,91 @@ MonoBehaviour:
         m_Flags: 0
       m_Flags: 0
     m_Reference: {fileID: 0}
-  m_MaxSpeed: 10
-  m_VRVerticalSpeed: 10
+  m_SecondaryCalibrateAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Controller Secondary Calibrate
+      m_Type: 1
+      m_ExpectedControlType:
+      m_Id: 723b0e01-9223-4953-9337-c96a2f8baaba
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: 5279c5fa-645f-4d02-a1c1-b01f2dccb56d
+        m_Path: <XRController>{RightHand}/secondaryButton
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: Right Controller Secondary Calibrate
+        m_Flags: 0
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  m_AscendAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Controller Ascend
+      m_Type: 0
+      m_ExpectedControlType: Axis
+      m_Id: c62216e5-b99e-43bf-9a38-b0d7700c02ba
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: 72e8f7ca-cf85-47d8-85c4-36d90df83f90
+        m_Path: <XRController>{RightHand}/trigger
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: Right Controller Ascend
+        m_Flags: 0
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  m_DescendAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Controller Descend
+      m_Type: 0
+      m_ExpectedControlType: Axis
+      m_Id: 5a017986-8e52-4cb4-a236-16b790587c1b
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: 814940e1-8e0a-4848-9075-488c58804690
+        m_Path: <XRController>{RightHand}/grip
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: Right Controller Descend
+        m_Flags: 0
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  m_YawAction:
+    m_UseReference: 0
+    m_Action:
+      m_Name: Right Controller Yaw
+      m_Type: 0
+      m_ExpectedControlType: Vector2
+      m_Id: 25da0c68-d0ed-4685-afc5-59df3b75d68a
+      m_Processors:
+      m_Interactions:
+      m_SingletonActionBindings:
+      - m_Name:
+        m_Id: d6722b98-6f1a-4836-bc40-86a27d8017a9
+        m_Path: <XRController>{RightHand}/primary2DAxis
+        m_Interactions:
+        m_Processors:
+        m_Groups:
+        m_Action: Right Controller Yaw
+        m_Flags: 0
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  m_RecalibrationPauseSeconds: 1.5
+  m_RecalibrationOverlayScale: 1.5
+  m_MaxSpeed: 5
+  m_VRVerticalSpeed: 5
+  m_VRYawSpeed: 60
   m_MaxOffset: 0.25
   m_DeadZone: 0.03
   m_ResponseCurve: 1.25
