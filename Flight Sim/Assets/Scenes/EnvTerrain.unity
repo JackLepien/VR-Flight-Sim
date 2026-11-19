@@ -2827,14 +2827,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 1252430994}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc42784cf147c0c48a680349fa168899, type: 3}
+  m_Script: {fileID: 11500000, guid: da59e11599404e83a75761dc7af1d5c7, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.GraphicRaycaster
-  m_IgnoreReversedGraphics: 1
-  m_BlockingObjects: 0
-  m_BlockingMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
+  m_EditorClassIdentifier: Assembly-CSharp::FlightInstrumentPanel
+  m_FlightRig: {fileID: 1510942976}
+  m_SpeedNeedle: {fileID: 1473285189}
+  m_AltitudeNeedle: {fileID: 1679392503}
+  m_AltitudeShortNeedle: {fileID: 20517726}
+  m_OverlayShader: {fileID: 4800000, guid: fcf2691ee6d245c6989645ba4147fa02, type: 3}
+  m_AltitudeFloor: 48.9
 --- !u!114 &1252430996
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4052,6 +4053,18 @@ PrefabInstance:
       propertyPath: m_Name
       value: XR Origin (VR)
       objectReference: {fileID: 0}
+    - target: {fileID: 1703620260817971762, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.92387956
+      objectReference: {fileID: 0}
+    - target: {fileID: 1703620260817971762, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.38268343
+      objectReference: {fileID: 0}
+    - target: {fileID: 1703620260817971762, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 45
+      objectReference: {fileID: 0}
     - target: {fileID: 3341638699729043459, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
       propertyPath: far clip plane
       value: 2000
@@ -4133,6 +4146,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+--- !u!4 &1510942976 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8821864088916747054, guid: 6207c5f8e6f091b42ba5ff48eaaba9a2, type: 3}
+  m_PrefabInstance: {fileID: 1510942975}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1513457108
 GameObject:
   m_ObjectHideFlags: 0

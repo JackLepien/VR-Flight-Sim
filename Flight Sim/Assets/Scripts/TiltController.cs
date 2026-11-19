@@ -24,6 +24,12 @@ public class TiltController : MonoBehaviour
     /// <summary>Translational flight speed normalized by the horizontal and vertical speed settings.</summary>
     public float MovementSpeedFraction { get; private set; }
 
+    /// <summary>Flight translation in world meters per second.</summary>
+    public Vector3 FlightVelocity { get; private set; }
+
+    /// <summary>Configured top horizontal flight speed in world meters per second.</summary>
+    public float MaxSpeed => Mathf.Max(0f, m_MaxSpeed);
+
     [Header("Control Source")]
     [Tooltip("VR Controller preserves the calibrated hand controls. Local Server uses browser cyclic, collective and pedals.")]
     [SerializeField] ControlSource m_ControlSource = ControlSource.VRController;
@@ -143,6 +149,7 @@ public class TiltController : MonoBehaviour
     void OnDisable()
     {
         MovementSpeedFraction = 0f;
+        FlightVelocity = Vector3.zero;
         Disable(m_PositionAction);
         Disable(m_CalibrateAction);
         Disable(m_SecondaryCalibrateAction);
@@ -159,6 +166,7 @@ public class TiltController : MonoBehaviour
     void Update()
     {
         MovementSpeedFraction = 0f;
+        FlightVelocity = Vector3.zero;
         bool useServer = m_ControlSource == ControlSource.LocalServer;
         Vector3 input;
         float yawRate;
@@ -211,8 +219,8 @@ public class TiltController : MonoBehaviour
 
             float verticalSpeed = useServer ? m_ClimbSpeed : m_VRVerticalSpeed;
             var horizontalInput = right * input.x + forward * input.z;
-            var velocity = horizontalInput * m_MaxSpeed + Vector3.up * (input.y * verticalSpeed);
-            transform.position += velocity * Time.deltaTime;
+            FlightVelocity = horizontalInput * m_MaxSpeed + Vector3.up * (input.y * verticalSpeed);
+            transform.position += FlightVelocity * Time.deltaTime;
 
             float horizontalFractionSquared = m_MaxSpeed != 0f ? horizontalInput.sqrMagnitude : 0f;
             float verticalFraction = verticalSpeed != 0f ? input.y : 0f;
