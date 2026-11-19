@@ -4,6 +4,7 @@ using UnityEngine;
 public sealed class BatRiderMount : MonoBehaviour
 {
     const float IdleWingSpeed = 0.5f;
+    const float WingSpeedResponsiveness = 6f;
 
     [SerializeField] Transform m_RiderView;
     [Tooltip("Seat position relative to the headset in the flight rig's axes.")]
@@ -29,7 +30,9 @@ public sealed class BatRiderMount : MonoBehaviour
         if (m_WingAnimator != null)
         {
             float speedFraction = m_FlightController != null ? m_FlightController.MovementSpeedFraction : 0f;
-            m_WingAnimator.speed = Mathf.Lerp(IdleWingSpeed, 1f, speedFraction);
+            float targetSpeed = Mathf.Lerp(IdleWingSpeed, 1f, speedFraction);
+            float blend = 1f - Mathf.Exp(-WingSpeedResponsiveness * Time.deltaTime);
+            m_WingAnimator.speed = Mathf.Lerp(m_WingAnimator.speed, targetSpeed, blend);
         }
     }
 }
